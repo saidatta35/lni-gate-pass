@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gate Pass Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    label {
+      font-weight: bold;
+    }
+    input, button {
+      margin: 5px 0;
+      padding: 8px;
+      width: 100%;
+    }
+    .item-group {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    .summary {
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    .item-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .item-row input {
+      flex: 1;
+      min-width: 120px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gate Pass Entry</h1>
+
+  <form id="gatePassForm">
+    <label>Party Name:</label>
+    <input type="text" id="party" required>
+    
+    <label for="whatsapp">WhatsApp Number:</label>
+    <input type="tel" id="whatsapp" name="whatsapp" placeholder="e.g. 91XXXXXXXXXX" required>
+
+    <label>Broker Name:</label>
+    <input type="text" id="broker" required>
+
+    <label>Date:</label>
+    <input type="date" id="date" required>
+
+    <label>Vehicle Number:</label>
+    <input type="text" id="vehicleNumber" required>
+
+    <h3>Items</h3>
+    <div id="itemsContainer"></div>
+    <button type="button" onclick="addItem()">➕ Add Item</button>
+
+    <div class="summary">
+      <p>Total Weight (Quintals): <span id="totalQtl">0</span></p>
+      <p>Total Price (₹): <span id="totalPrice">0</span></p>
+    </div>
+
+    <button type="submit">Save Gate Pass</button>
+    <button type="button" id="whatsappSend">Send via WhatsApp</button>
+
+  </form>
+
+  <script>
+    let items = [];
+
+    function addItem() {
+      const container = document.createElement('div');
+      container.className = 'item-group';
+
+      container.innerHTML = `
+        <div class="item-row">
+          <input type="text" placeholder="Brand" class="brand" required>
+          <input type="number" placeholder="No. of Bags" class="bags" min="1" required>
+          <input type="number" placeholder="Weight per Bag (kg)" class="bagWeight" min="1" required>
+          <input type="number" placeholder="Rate per Quintal (₹)" class="rate" min="1" required>
+        </div>
+      `;
+
+      document.getElementById('itemsContainer').appendChild(container);
+    }
+
+    function calculateTotalsAndItems() {
+      const itemGroups = document.querySelectorAll('.item-group');
+      let totalQtl = 0;
+      let totalPrice = 0;
+      items = [];
+
+      itemGroups.forEach(group => {
+        const brand = group.querySelector('.brand').value;
+        const bags = parseFloat(group.querySelector('.bags').value);
+        const bagWeight = parseFloat(group.querySelector('.bagWeight').value);
+        const rate = parseFloat(group.querySelector('.rate').value);
+
+        if (!isNaN(bags) && !isNaN(bagWeight) && !isNaN(rate)) {
+          const totalWeightKg = bags * bagWeight;
+          const totalWeightQtl = totalWeightKg / 100;
+          const price = totalWeightQtl * rate;
+
+          items.push({
+            brand,
+            bags,
+            bagWeight,
+            rate,
+            totalWeightQtl: totalWeightQtl.toFixed(2),
+            totalPrice: price.toFixed(2)
+          });
+
+          totalQtl += totalWeightQtl;
+          totalPrice += price;
+        }
+      });
+
+      document.getElementById('totalQtl').innerText = totalQtl.toFixed(2);
+      document.getElementById('totalPrice').innerText = totalPrice.toFixed(2);
+    }
+
+    document.getElementById('gatePassForm').addEventListener('input', calculateTotalsAndItems);
+
+    document.getElementById('gatePassForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      calculateTotalsAndItems();
+
+      const party = document.getElementById('party').value;
+      const broker = document.getElementById('broker').value;
+      const date = document.getElementById('date').value;
+      const vehicleNumber = document.getElementById('vehicleNumber').value;
+      const totalQtl = document.getElementById('totalQtl').innerText;
+      const totalPrice = document.getElementById('totalPrice').innerText;
+
+      try {
+        const response = await fetch('/api/gatepass', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            party,
+            broker,
+            date,
+            vehicleNumber,
+            totalQtl,
+            totalPrice,
+            items
+          })
+        });
+
+        const result = await response.json();
+        alert('✅ Gate pass saved!');
+        window.open(`/gatepass-print.html?data=${encodeURIComponent(JSON.stringify({
+          party,
+          broker,
+          date,
+          vehicleNumber,
+          totalQtl,
+          totalPrice,
+          items
+        }))}`, '_blank');
+
+
+      } catch (err) {
+        console.error('❌ Error:', err);
+        alert('Failed to save gate pass');
+      }
+    });
+
+    document.getElementById('whatsappSend').addEventListener('click', () => {
+      const party = document.getElementById('party').value;
+      const broker = document.getElementById('broker').value;
+      const date = document.getElementById('date').value;
+      const vehicleNumber = document.getElementById('vehicleNumber').value;
+      const whatsapp = document.getElementById('whatsapp').value;
+
+      calculateTotalsAndItems();
+
+      let message = `📦 GATE PASS\n\n🧾 Party: ${party}\n🤝 Broker: ${broker}\n📅 Date: ${date}\n🚚 Vehicle: ${vehicleNumber}\n\n`;
+
+      items.forEach((item, i) => {
+        message += `🔹 Item ${i + 1}:\nBrand: ${item.brand}\nBags: ${item.bags}\nBag Weight: ${item.bagWeight}kg\nRate: ₹${item.rate}/qtl\nWeight: ${item.totalWeightQtl} qtl\nPrice: ₹${item.totalPrice}\n\n`;
+      });
+
+      const totalQtl = document.getElementById('totalQtl').innerText;
+      const totalPrice = document.getElementById('totalPrice').innerText;
+      message += `📊 Total Weight: ${totalQtl} qtl\n💰 Total Price: ₹${totalPrice}`;
+
+      const encodedMsg = encodeURIComponent(message);
+      const waUrl = `https://wa.me/${whatsapp}?text=${encodedMsg}`;
+      window.open(waUrl, '_blank');
+    });
+  </script>
+</body>
+</html>

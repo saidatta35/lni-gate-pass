@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gate Pass Print</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>📄 Gate Pass Details</h1>
+
+  <div id="gatePassDetails">
+    <!-- Details will be displayed here -->
+  </div>
+
+  <script>
+    // Function to get query parameter by name
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    async function fetchGatePassDetails() {
+      const id = getQueryParam('id'); // Get the 'id' from the URL
+
+      if (!id) {
+        alert('No gate pass ID found!');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/gatepass/${id}`); // Fetch gate pass by ID
+        const data = await res.json();
+
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        // Display gate pass details
+        const detailsContainer = document.getElementById('gatePassDetails');
+        const pass = data;
+
+        const totalPriceFormatted = parseFloat(pass.totalPrice).toFixed(2);
+        detailsContainer.innerHTML = `
+          <h3>Gate Pass ID: ${pass._id}</h3>
+          <table>
+            <tr><th>Date</th><td>${pass.date}</td></tr>
+            <tr><th>Party</th><td>${pass.party}</td></tr>
+            <tr><th>Broker</th><td>${pass.broker}</td></tr>
+            <tr><th>Vehicle</th><td>${pass.vehicleNumber || '-'}</td></tr>
+            <tr><th>Total Qtl</th><td>${pass.totalQtl}</td></tr>
+            <tr><th>Total Price</th><td>₹${totalPriceFormatted}</td></tr>
+          </table>
+          <h4>Items</h4>
+          <ul>
+            ${pass.items.map(item => `
+              <li>${item.brand} – ${item.bags} bags × ${item.bagWeight}kg @ ₹${item.rate}/qtl</li>
+            `).join('')}
+          </ul>
+        `;
+      } catch (error) {
+        console.error('Error fetching gate pass details:', error);
+        alert('Error fetching gate pass details.');
+      }
+    }
+
+    fetchGatePassDetails();
+  </script>
+</body>
+</html>

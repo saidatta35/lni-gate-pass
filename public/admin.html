@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>All Gate Passes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: left;
+      vertical-align: top;
+    }
+    input {
+      padding: 8px;
+      margin: 5px;
+      width: 200px;
+    }
+    button {
+      padding: 6px 12px;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+    ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📋 Gate Pass Records</h1>
+
+  <input type="text" id="searchParty" placeholder="Search by party name">
+  <input type="date" id="searchDate">
+  <button onclick="loadGatePasses()">🔍 Search</button>
+
+  <table id="passTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Party</th>
+        <th>Broker</th>
+        <th>Vehicle</th>
+        <th>Total Qtl</th>
+        <th>Total Price</th>
+        <th>Items</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function loadGatePasses() {
+      const partyFilter = document.getElementById('searchParty').value.toLowerCase();
+      const dateFilter = document.getElementById('searchDate').value;
+
+      const res = await fetch('/api/gatepass');
+      const data = await res.json();
+      const tbody = document.querySelector('#passTable tbody');
+      tbody.innerHTML = '';
+
+      data.data.forEach(pass => {
+        if (
+          (partyFilter && !pass.party.toLowerCase().includes(partyFilter)) ||
+          (dateFilter && pass.date !== dateFilter)
+        ) return;
+
+        const tr = document.createElement('tr');
+
+        const totalPriceFormatted = parseFloat(pass.totalPrice).toFixed(2);
+
+        tr.innerHTML = `
+          <td>${pass.date}</td>
+          <td>${pass.party}</td>
+          <td>${pass.broker}</td>
+          <td>${pass.vehicleNumber || '-'}</td>
+          <td>${pass.totalQtl}</td>
+          <td>₹${totalPriceFormatted}</td>
+          <td>
+            <ul>
+              ${pass.items.map(item => `
+                <li>${item.brand} – ${item.bags} bags × ${item.bagWeight}kg @ ₹${item.rate}/qtl</li>
+              `).join('')}
+            </ul>
+            ${pass._id ? `
+              <button onclick="window.open('gatepass-print.html?id=${pass._id}', '_blank')">🖨️ Print</button>
+            ` : '<span style="color:red;">Missing ID</span>'}
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    loadGatePasses();
+  </script>
+</body>
+</html>
+        
