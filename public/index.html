@@ -2,228 +2,248 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Create Gate Pass</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LNI Combined Gate Pass</title>
   <style>
-    :root {
-      --primary: #0052cc;
-      --accent: #36d399;
-      --bg: #f4f6f8;
-      --card-bg: #fff;
-      --text-dark: #333;
-      --text-light: #777;
-    }
-
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg);
+      font-family: Arial, sans-serif;
+      background-color: #f2f3f5;
       margin: 0;
-      padding: 0;
-      color: var(--text-dark);
+      padding: 20px;
     }
-
     .container {
-      max-width: 800px;
-      margin: 40px auto;
-      background-color: var(--card-bg);
-      padding: 30px 40px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      max-width: 900px;
+      margin: auto;
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-
     h1 {
       text-align: center;
+      color: #2c3e50;
       margin-bottom: 30px;
-      color: var(--primary);
     }
-
-    form label {
+    .input-group {
+      margin-bottom: 15px;
+    }
+    label {
+      font-weight: bold;
       display: block;
-      margin-bottom: 12px;
-      font-weight: 500;
+      margin-bottom: 5px;
+      color: #2c3e50;
     }
-
-    input[type="text"],
-    input[type="number"],
-    input[type="date"] {
+    input {
       width: 100%;
-      padding: 10px 12px;
-      margin-top: 6px;
+      padding: 10px;
+      font-size: 15px;
       border: 1px solid #ccc;
       border-radius: 6px;
-      font-size: 15px;
-      box-sizing: border-box;
     }
-
-    .form-row {
+    .order-item {
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
       margin-bottom: 20px;
     }
-
-    .item-group {
-      margin-bottom: 16px;
-      border: 1px solid #ddd;
-      padding: 16px;
-      border-radius: 8px;
-      background-color: #f9f9f9;
-    }
-
-    .item-group input {
-      margin-bottom: 10px;
-    }
-
     button {
-      padding: 10px 20px;
-      font-size: 16px;
+      background-color: #1877f2;
+      color: white;
+      padding: 10px 18px;
       border: none;
+      font-size: 16px;
       border-radius: 6px;
       cursor: pointer;
+      margin-top: 10px;
       margin-right: 10px;
     }
-
-    .add-btn {
-      background-color: #00b894;
+    button:hover {
+      background-color: #145bd1;
+    }
+    .gate-pass {
+      margin-top: 25px;
+      background-color: #fefefe;
+      padding: 20px;
+      border-left: 4px solid #1877f2;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .gate-pass button {
+      margin-top: 15px;
+      background-color: #28a745;
       color: white;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
     }
-
-    .submit-btn {
-      background-color: var(--primary);
-      color: white;
+    .gate-pass button:hover {
+      background-color: #218838;
     }
-
-    .submit-btn:hover {
-      background-color: #003c99;
+    .bold {
+      font-weight: bold;
     }
-
-    @media (max-width: 600px) {
-      .container {
-        padding: 20px;
-      }
+    hr {
+      border: 1px solid #eee;
+      margin: 20px 0;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Create Gate Pass</h1>
-    <form id="gatePassForm">
-      <div class="form-row">
-        <label>Party:
-          <input type="text" id="party" required>
-        </label>
-      </div>
-      <div class="form-row">
-        <label>Broker:
-          <input type="text" id="broker" required>
-        </label>
-      </div>
-      <div class="form-row">
-        <label>Date:
-          <input type="date" id="date" required>
-        </label>
-      </div>
-      <div class="form-row">
-        <label>Vehicle Number:
-          <input type="text" id="vehicleNumber">
-        </label>
-      </div>
+    <h1>LNI Gate Pass (Multiple Orders)</h1>
+    <div class="input-group">
+      <label>Party Name:</label>
+      <input type="text" id="party" />
+    </div>
+    <div class="input-group">
+      <label>Broker Name:</label>
+      <input type="text" id="broker" />
+    </div>
+    <div class="input-group">
+      <label>Order Date:</label>
+      <input type="date" id="date" />
+    </div>
 
-      <h3>Items</h3>
-      <div id="itemsContainer">
-        <div class="item-group">
-          <label>Brand:
-            <input type="text" placeholder="Brand" class="brand" required>
-          </label>
-          <label>Bags:
-            <input type="number" placeholder="Bags" class="bags" required>
-          </label>
-          <label>Bag Weight (kg):
-            <input type="number" placeholder="Bag Weight (kg)" class="bagWeight" required>
-          </label>
-          <label>Rate (₹/qtl):
-            <input type="number" placeholder="Rate" class="rate" required>
-          </label>
-        </div>
-      </div>
+    <div id="orderItems"></div>
 
-      <button type="button" class="add-btn" onclick="addItem()">+ Add Another Item</button><br><br>
-      <button type="submit" class="submit-btn">Save & Print</button>
-    </form>
+    <button onclick="addOrderItem()">+ Add Order Item</button>
+    <button onclick="generateCombinedGatePass()">Generate Gate Pass</button>
+
+    <div class="gate-pass" id="finalGatePass"></div>
   </div>
 
   <script>
-    function addItem() {
-      const itemDiv = document.createElement('div');
-      itemDiv.classList.add('item-group');
-      itemDiv.innerHTML = `
-        <label>Brand:
-          <input type="text" placeholder="Brand" class="brand" required>
-        </label>
-        <label>Bags:
-          <input type="number" placeholder="Bags" class="bags" required>
-        </label>
-        <label>Bag Weight (kg):
-          <input type="number" placeholder="Bag Weight (kg)" class="bagWeight" required>
-        </label>
-        <label>Rate (₹/qtl):
-          <input type="number" placeholder="Rate" class="rate" required>
-        </label>
+    let orderItemCount = 0;
+
+    function addOrderItem() {
+      orderItemCount++;
+      const container = document.getElementById("orderItems");
+
+      const html = `
+        <div class="order-item" id="item${orderItemCount}">
+          <h3>Item ${orderItemCount}</h3>
+          <div class="input-group">
+            <label>Brand:</label>
+            <input type="text" id="brand${orderItemCount}">
+          </div>
+          <div class="input-group">
+            <label>Number of Bags:</label>
+            <input type="number" id="bags${orderItemCount}" min="1">
+          </div>
+          <div class="input-group">
+            <label>Weight per Bag (kg):</label>
+            <input type="number" id="bagWeight${orderItemCount}" min="1" step="0.1">
+          </div>
+          <div class="input-group">
+            <label>Rate per Quintal (₹):</label>
+            <input type="number" id="rate${orderItemCount}" step="0.01">
+          </div>
+        </div>
       `;
-      document.getElementById('itemsContainer').appendChild(itemDiv);
+
+      container.insertAdjacentHTML("beforeend", html);
     }
 
-    function calculateItems() {
-      const items = [];
-      const itemDivs = document.querySelectorAll('.item-group');
-      itemDivs.forEach(div => {
-        const brand = div.querySelector('.brand').value;
-        const bags = parseInt(div.querySelector('.bags').value);
-        const bagWeight = parseFloat(div.querySelector('.bagWeight').value);
-        const rate = parseFloat(div.querySelector('.rate').value);
-        items.push({ brand, bags, bagWeight, rate });
-      });
-      return items;
+    async function saveToDatabase(data) {
+      try {
+        const response = await fetch('/api/gatepass', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        console.log('✅ Saved:', result.message || result);
+      } catch (err) {
+        console.error('❌ Error saving:', err);
+      }
     }
 
-    document.getElementById('gatePassForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const party = document.getElementById('party').value;
-      const broker = document.getElementById('broker').value;
-      const date = document.getElementById('date').value;
-      const vehicleNumber = document.getElementById('vehicleNumber').value;
+    function generateCombinedGatePass() {
+      const party = document.getElementById("party").value || 'N/A';
+      const broker = document.getElementById("broker").value || 'N/A';
+      const date = document.getElementById("date").value || 'N/A';
 
-      const items = calculateItems();
       let totalQtl = 0;
       let totalPrice = 0;
-      items.forEach(item => {
-        const qtl = (item.bags * item.bagWeight) / 100;
-        totalQtl += qtl;
-        totalPrice += qtl * item.rate;
-      });
+      let itemsHTML = "";
+      const itemData = [];
+
+      for (let i = 1; i <= orderItemCount; i++) {
+        const brand = document.getElementById(`brand${i}`)?.value || 'N/A';
+        const rate = parseFloat(document.getElementById(`rate${i}`)?.value) || 0;
+        const bags = parseInt(document.getElementById(`bags${i}`)?.value) || 0;
+        const bagWeight = parseFloat(document.getElementById(`bagWeight${i}`)?.value) || 0;
+
+        const itemKg = bags * bagWeight;
+        const itemQtl = itemKg / 100;
+        const itemPrice = itemQtl * rate;
+
+        totalQtl += itemQtl;
+        totalPrice += itemPrice;
+
+        itemsHTML += `
+          <p><span class="bold">Brand:</span> ${brand} | 
+             <span class="bold">Qty:</span> ${itemQtl.toFixed(2)} qtl | 
+             <span class="bold">Rate:</span> ₹${rate.toFixed(2)} | 
+             <span class="bold">Price:</span> ₹${itemPrice.toFixed(2)}</p>
+        `;
+
+        itemData.push({ brand, bags, bagWeight, rate });
+      }
+
+      const html = `
+        <div id="printArea">
+          <p><span class="bold">LNI Gate Pass</span></p>
+          <p><span class="bold">Party:</span> ${party}</p>
+          <p><span class="bold">Broker:</span> ${broker}</p>
+          <p><span class="bold">Date:</span> ${date}</p>
+          <hr/>
+          ${itemsHTML}
+          <hr/>
+          <p><span class="bold">Total Weight:</span> ${totalQtl.toFixed(2)} qtl</p>
+          <p><span class="bold">Total Price:</span> ₹${totalPrice.toFixed(2)}</p>
+        </div>
+        <button onclick="printGatePass()">🖨️ Print Gate Pass</button>
+        <button onclick="shareOnWhatsApp()">📲 Share on WhatsApp</button>
+      `;
+
+      document.getElementById("finalGatePass").innerHTML = html;
 
       const gatePassData = {
         party,
         broker,
         date,
-        vehicleNumber,
+        items: itemData,
         totalQtl: totalQtl.toFixed(2),
-        totalPrice: totalPrice.toFixed(2),
-        items
+        totalPrice: totalPrice.toFixed(2)
       };
+      saveToDatabase(gatePassData);
+    }
 
-      try {
-        await fetch('/api/gatepass', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(gatePassData)
-        });
-        sessionStorage.setItem('latestGatePass', JSON.stringify(gatePassData));
-        window.open('gatepass-print.html', '_blank');
-      } catch (err) {
-        alert('Error saving gate pass');
-        console.error(err);
-      }
-    });
+    function printGatePass() {
+      const printContents = document.getElementById("printArea").innerHTML;
+      const originalContents = document.body.innerHTML;
+      document.body.innerHTML = printContents;
+      window.print();
+      document.body.innerHTML = originalContents;
+      window.location.reload();
+    }
+
+    function shareOnWhatsApp() {
+      const printArea = document.getElementById("printArea");
+      if (!printArea) return;
+
+      const text = printArea.innerText;
+      const encodedText = encodeURIComponent(text);
+      const whatsappURL = `https://wa.me/?text=${encodedText}`;
+      window.open(whatsappURL, "_blank");
+    }
   </script>
 </body>
 </html>
+
