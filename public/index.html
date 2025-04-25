@@ -2,204 +2,227 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Gate Pass Form</title>
+  <title>Create Gate Pass</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      max-width: 800px;
-      margin: auto;
+    :root {
+      --primary: #0052cc;
+      --accent: #36d399;
+      --bg: #f4f6f8;
+      --card-bg: #fff;
+      --text-dark: #333;
+      --text-light: #777;
     }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      margin: 0;
+      padding: 0;
+      color: var(--text-dark);
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background-color: var(--card-bg);
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
     h1 {
       text-align: center;
+      margin-bottom: 30px;
+      color: var(--primary);
     }
-    label {
-      font-weight: bold;
+
+    form label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: 500;
     }
-    input, button {
-      margin: 5px 0;
-      padding: 8px;
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"] {
       width: 100%;
-    }
-    .item-group {
+      padding: 10px 12px;
+      margin-top: 6px;
       border: 1px solid #ccc;
-      padding: 10px;
+      border-radius: 6px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    .form-row {
+      margin-bottom: 20px;
+    }
+
+    .item-group {
+      margin-bottom: 16px;
+      border: 1px solid #ddd;
+      padding: 16px;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+
+    .item-group input {
       margin-bottom: 10px;
-      border-radius: 5px;
     }
-    .summary {
-      font-weight: bold;
-      margin-top: 20px;
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 10px;
     }
-    .item-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+
+    .add-btn {
+      background-color: #00b894;
+      color: white;
     }
-    .item-row input {
-      flex: 1;
-      min-width: 120px;
+
+    .submit-btn {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .submit-btn:hover {
+      background-color: #003c99;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Gate Pass Entry</h1>
+  <div class="container">
+    <h1>Create Gate Pass</h1>
+    <form id="gatePassForm">
+      <div class="form-row">
+        <label>Party:
+          <input type="text" id="party" required>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Broker:
+          <input type="text" id="broker" required>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Date:
+          <input type="date" id="date" required>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Vehicle Number:
+          <input type="text" id="vehicleNumber">
+        </label>
+      </div>
 
-  <form id="gatePassForm">
-    <label>Party Name:</label>
-    <input type="text" id="party" required>
-    
-    <label for="whatsapp">WhatsApp Number:</label>
-    <input type="tel" id="whatsapp" name="whatsapp" placeholder="e.g. 91XXXXXXXXXX" required>
+      <h3>Items</h3>
+      <div id="itemsContainer">
+        <div class="item-group">
+          <label>Brand:
+            <input type="text" placeholder="Brand" class="brand" required>
+          </label>
+          <label>Bags:
+            <input type="number" placeholder="Bags" class="bags" required>
+          </label>
+          <label>Bag Weight (kg):
+            <input type="number" placeholder="Bag Weight (kg)" class="bagWeight" required>
+          </label>
+          <label>Rate (₹/qtl):
+            <input type="number" placeholder="Rate" class="rate" required>
+          </label>
+        </div>
+      </div>
 
-    <label>Broker Name:</label>
-    <input type="text" id="broker" required>
-
-    <label>Date:</label>
-    <input type="date" id="date" required>
-
-    <label>Vehicle Number:</label>
-    <input type="text" id="vehicleNumber" required>
-
-    <h3>Items</h3>
-    <div id="itemsContainer"></div>
-    <button type="button" onclick="addItem()">➕ Add Item</button>
-
-    <div class="summary">
-      <p>Total Weight (Quintals): <span id="totalQtl">0</span></p>
-      <p>Total Price (₹): <span id="totalPrice">0</span></p>
-    </div>
-
-    <button type="submit">Save Gate Pass</button>
-    <button type="button" id="whatsappSend">Send via WhatsApp</button>
-
-  </form>
+      <button type="button" class="add-btn" onclick="addItem()">+ Add Another Item</button><br><br>
+      <button type="submit" class="submit-btn">Save & Print</button>
+    </form>
+  </div>
 
   <script>
-    let items = [];
-
     function addItem() {
-      const container = document.createElement('div');
-      container.className = 'item-group';
-
-      container.innerHTML = `
-        <div class="item-row">
+      const itemDiv = document.createElement('div');
+      itemDiv.classList.add('item-group');
+      itemDiv.innerHTML = `
+        <label>Brand:
           <input type="text" placeholder="Brand" class="brand" required>
-          <input type="number" placeholder="No. of Bags" class="bags" min="1" required>
-          <input type="number" placeholder="Weight per Bag (kg)" class="bagWeight" min="1" required>
-          <input type="number" placeholder="Rate per Quintal (₹)" class="rate" min="1" required>
-        </div>
+        </label>
+        <label>Bags:
+          <input type="number" placeholder="Bags" class="bags" required>
+        </label>
+        <label>Bag Weight (kg):
+          <input type="number" placeholder="Bag Weight (kg)" class="bagWeight" required>
+        </label>
+        <label>Rate (₹/qtl):
+          <input type="number" placeholder="Rate" class="rate" required>
+        </label>
       `;
-
-      document.getElementById('itemsContainer').appendChild(container);
+      document.getElementById('itemsContainer').appendChild(itemDiv);
     }
 
-    function calculateTotalsAndItems() {
-      const itemGroups = document.querySelectorAll('.item-group');
-      let totalQtl = 0;
-      let totalPrice = 0;
-      items = [];
-
-      itemGroups.forEach(group => {
-        const brand = group.querySelector('.brand').value;
-        const bags = parseFloat(group.querySelector('.bags').value);
-        const bagWeight = parseFloat(group.querySelector('.bagWeight').value);
-        const rate = parseFloat(group.querySelector('.rate').value);
-
-        if (!isNaN(bags) && !isNaN(bagWeight) && !isNaN(rate)) {
-          const totalWeightKg = bags * bagWeight;
-          const totalWeightQtl = totalWeightKg / 100;
-          const price = totalWeightQtl * rate;
-
-          items.push({
-            brand,
-            bags,
-            bagWeight,
-            rate,
-            totalWeightQtl: totalWeightQtl.toFixed(2),
-            totalPrice: price.toFixed(2)
-          });
-
-          totalQtl += totalWeightQtl;
-          totalPrice += price;
-        }
+    function calculateItems() {
+      const items = [];
+      const itemDivs = document.querySelectorAll('.item-group');
+      itemDivs.forEach(div => {
+        const brand = div.querySelector('.brand').value;
+        const bags = parseInt(div.querySelector('.bags').value);
+        const bagWeight = parseFloat(div.querySelector('.bagWeight').value);
+        const rate = parseFloat(div.querySelector('.rate').value);
+        items.push({ brand, bags, bagWeight, rate });
       });
-
-      document.getElementById('totalQtl').innerText = totalQtl.toFixed(2);
-      document.getElementById('totalPrice').innerText = totalPrice.toFixed(2);
+      return items;
     }
 
-    document.getElementById('gatePassForm').addEventListener('input', calculateTotalsAndItems);
-
-    document.getElementById('gatePassForm').addEventListener('submit', async (e) => {
+    document.getElementById('gatePassForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      calculateTotalsAndItems();
-
       const party = document.getElementById('party').value;
       const broker = document.getElementById('broker').value;
       const date = document.getElementById('date').value;
       const vehicleNumber = document.getElementById('vehicleNumber').value;
-      const totalQtl = document.getElementById('totalQtl').innerText;
-      const totalPrice = document.getElementById('totalPrice').innerText;
+
+      const items = calculateItems();
+      let totalQtl = 0;
+      let totalPrice = 0;
+      items.forEach(item => {
+        const qtl = (item.bags * item.bagWeight) / 100;
+        totalQtl += qtl;
+        totalPrice += qtl * item.rate;
+      });
+
+      const gatePassData = {
+        party,
+        broker,
+        date,
+        vehicleNumber,
+        totalQtl: totalQtl.toFixed(2),
+        totalPrice: totalPrice.toFixed(2),
+        items
+      };
 
       try {
-        const response = await fetch('/api/gatepass', {
+        await fetch('/api/gatepass', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            party,
-            broker,
-            date,
-            vehicleNumber,
-            totalQtl,
-            totalPrice,
-            items
-          })
+          body: JSON.stringify(gatePassData)
         });
-
-        const result = await response.json();
-        alert('✅ Gate pass saved!');
-        window.open(`/gatepass-print.html?data=${encodeURIComponent(JSON.stringify({
-          party,
-          broker,
-          date,
-          vehicleNumber,
-          totalQtl,
-          totalPrice,
-          items
-        }))}`, '_blank');
-
-
+        sessionStorage.setItem('latestGatePass', JSON.stringify(gatePassData));
+        window.open('gatepass-print.html', '_blank');
       } catch (err) {
-        console.error('❌ Error:', err);
-        alert('Failed to save gate pass');
+        alert('Error saving gate pass');
+        console.error(err);
       }
-    });
-
-    document.getElementById('whatsappSend').addEventListener('click', () => {
-      const party = document.getElementById('party').value;
-      const broker = document.getElementById('broker').value;
-      const date = document.getElementById('date').value;
-      const vehicleNumber = document.getElementById('vehicleNumber').value;
-      const whatsapp = document.getElementById('whatsapp').value;
-
-      calculateTotalsAndItems();
-
-      let message = `📦 GATE PASS\n\n🧾 Party: ${party}\n🤝 Broker: ${broker}\n📅 Date: ${date}\n🚚 Vehicle: ${vehicleNumber}\n\n`;
-
-      items.forEach((item, i) => {
-        message += `🔹 Item ${i + 1}:\nBrand: ${item.brand}\nBags: ${item.bags}\nBag Weight: ${item.bagWeight}kg\nRate: ₹${item.rate}/qtl\nWeight: ${item.totalWeightQtl} qtl\nPrice: ₹${item.totalPrice}\n\n`;
-      });
-
-      const totalQtl = document.getElementById('totalQtl').innerText;
-      const totalPrice = document.getElementById('totalPrice').innerText;
-      message += `📊 Total Weight: ${totalQtl} qtl\n💰 Total Price: ₹${totalPrice}`;
-
-      const encodedMsg = encodeURIComponent(message);
-      const waUrl = `https://wa.me/${whatsapp}?text=${encodedMsg}`;
-      window.open(waUrl, '_blank');
     });
   </script>
 </body>
